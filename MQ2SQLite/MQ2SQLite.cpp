@@ -159,16 +159,16 @@ namespace KnightlySQLite {
 			//  argv = An array of strings representing fields in the row
 			// azColName = An array of strings representing column names
 			static int callbackSQLite(void *data, int argc, char **argv, char **azColName) {
-				std::string strQueryName = std::string((const char*)data);
+				const std::string& strQueryName = *static_cast<std::string*>(data);
 				int i;
-				
+
 				if (KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"].count("Rows") == 1) {
 					// Convert the current rows to an int, add one, convert it back
 					KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"]["Rows"] = std::to_string((std::stoi(KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"]["Rows"])+1));
 				} else {
 					// We are the first row.
 					KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"]["Rows"] = "1";
-				}				
+				}
 
 				for (i = 0; i < argc; i++) {
 					std::string strColumnName = azColName[i];
