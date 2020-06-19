@@ -11,12 +11,11 @@
 // your query which will clear the results for you before each run.
 
 
-#include "../MQ2Plugin.h"
-#include "..\MQ2SQLiteDeps\sqlite3.h"
+#include "../../MQ2Plugin.h"
+#include "sqlite3.h"
 #include <fstream>
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 #include <experimental/filesystem>
-
-#pragma comment(lib, "..\\MQ2SQLiteDeps\\sqlite3.lib")
 
 PreSetup("MQ2SQLite");
 

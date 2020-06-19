@@ -28,46 +28,47 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\Plugin.Release.props" />
+    <Import Project="..\..\Plugin.Release.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\Plugin.Debug.props" />
+    <Import Project="..\..\Plugin.Debug.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>11.0.51106.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(ProjectDir)..\$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)..\build\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)..\build\bin\$(Configuration)\$(ProjectName)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(ProjectDir)..\$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)..\build\$(Configuration)\$(ProjectName)\</IntDir>
+    <OutDir>$(ProjectDir)..\build\bin\$(Configuration)\$(ProjectName)\</OutDir>
+    <OutDir>$(ProjectDir)..\..\$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Link>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\Detours\lib;$(ProjectDir)..\..\$(Configuration);$(ProjectDir)..\build\bin\$(Configuration)\sqlite3;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\external\sqlite3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Link>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\Detours\lib;$(ProjectDir)..\..\$(Configuration);$(ProjectDir)..\build\bin\$(Configuration)\sqlite3;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\external\sqlite3\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MQ2SQLite.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\MQ2Plugin.h" />
-    <ClInclude Include="..\MQ2SQLiteDeps\sqlite3.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
