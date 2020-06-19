@@ -40,7 +40,7 @@ Example:
 ## Advanced Usage
 
 By default, the `/sqlite query` command will open a database, run the query and then close the database.
-This doesn't allow for more complex operations like transactions or in-memory tables since the connection
+This doesn't allow for more complex operations like transactions or in-memory databases since the connection
 closes after every operation.  It does have the benefit of handling all of the operations for you, however.
 
 When your needs are a bit more robust, you can use the advanced query syntax to perform any operation you
@@ -51,7 +51,8 @@ Opening a database connection:
 Example:  
 ```/sqlite open MyDatabase C:\Test.db SQLITE_OPEN_READWRITE|SQLITE_OPEN_WAL```
 
-This would open the database C:\Test.db in read write mode with write ahead logging enabled.  For a list of
+This would open the database C:\Test.db in read write mode with write ahead logging enabled.  If no flags
+are passed then the default flags of SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE are used.  For a list of
 available flags see:  https://www.sqlite.org/c3ref/c_open_autoproxy.html
 
 Once the connection is open, you can use advquery to query that specific connection:  
@@ -70,3 +71,5 @@ Example:
 It should go without saying that advanced usage can be dangerous and I leave it in your hands not to screw
 it up.  But, in case it doesn't go without saying: Advanced usage can be dangerous and I leave it in your
 hands not to screw it up.
+
+You now have the full power of SQLite at your disposal.  Use it wisely.  Or don't.  I'm not your dad.
