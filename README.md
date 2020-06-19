@@ -12,7 +12,7 @@ the results for you before each run.
 
 ## Simple Usage
 
-```/sqlite query <"Path to Database File"> <QueryName> QUERY```
+```/sqlite query <"Path to Database File"> <QueryName> QUERY```  
 Example:  
 ```/sqlite query C:\Test.db myquery SELECT * FROM Table;```
 
@@ -34,7 +34,7 @@ Additionally, custom errors are returned as negative numbers.  The following ret
   -3: There was a conversion error on string to int conversion for the result code
 
 Example:  
-  `/echo ${sqlite.result[myquery 1 Name]}`
+  `/echo ${sqlite.result[myquery 1 Name]}`  
   The above would return the value of the column named "Name" for the first row of results from myquery.
 
 ## Advanced Usage
@@ -47,23 +47,23 @@ When your needs are a bit more robust, you can use the advanced query syntax to 
 would like.  This also allows for passing flags to the database open operation.
 
 Opening a database connection:  
-```/sqlite open <ConnectionName> <"Path to Database File"> [FLAGS]```
+```/sqlite open <ConnectionName> <"Path to Database File"> [FLAGS]```  
 Example:  
 ```/sqlite open MyDatabase C:\Test.db SQLITE_OPEN_READWRITE|SQLITE_OPEN_WAL```
 
 This would open the database C:\Test.db in read write mode with write ahead logging enabled.  For a list of
 available flags see:  https://www.sqlite.org/c3ref/c_open_autoproxy.html
 
-Once the connection is open, you can use advquery to query that specific connection:
-```/sqlite advquery <ConnName> <ResultName> <QUERY>```
+Once the connection is open, you can use advquery to query that specific connection:  
+```/sqlite advquery <ConnName> <ResultName> <QUERY>```  
 Example:  
 ```/sqlite advquery MyDatabase myquery SELECT * FROM Table;```
 
 This performs the query on the connection named MyDatabase and stores the result in myquery.  See above for
 how to access this result.
 
-Finally, when you are done, you will want to close the connection to the database:
-```/sqlite close <ConnName>```
+Finally, when you are done, you will want to close the connection to the database:  
+```/sqlite close <ConnName>```  
 Example:  
 ```/sqlite close MyDatabase```
 
