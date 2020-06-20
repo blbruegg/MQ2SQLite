@@ -11,13 +11,12 @@
 // your query which will clear the results for you before each run.
 
 
-#include "../../MQ2Plugin.h"
+#include <mq/Plugin.h>
 #include "sqlite3.h"
 
 #include <fstream>
-#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 // MQ2's inclusion of Windows.h interferes with the min/max functions in the std lib.
 #undef min
@@ -47,8 +46,7 @@ namespace KnightlyCommon {
 				strMessage = "\ay[\ag" + KnightlyCommon::pluginName + "\ay]\aw ::: \ao" + strMessage;
 				// Make sure we don't exceed the limit of WriteChatf -- which is MAX_STRING.
 				strMessage = strMessage.substr(0, MAX_STRING - 1);
-				// NEXTME: WriteChatf(strMessage.c_str());
-				WriteChatf(&strMessage[0]);
+				WriteChatf(strMessage.c_str());
 			}
 
 			// Warning is for logging warnings
@@ -89,7 +87,7 @@ namespace KnightlyCommon {
 			 *
 			 * @return std::string The result of replacing the values in the original string
 			 */
-			static std::string ReplaceSubstring(std::string /* NEXTME: string_view */ strOriginal, std::string /* NEXTME: string_view */ strFind, std::string /* NEXTME: string_view */ strReplace) {
+			static std::string ReplaceSubstring(std::string_view strOriginal, std::string_view strFind, std::string_view strReplace) {
 				// Set a tracker for our position
 				size_t iCurrentPosition = 0;
 				std::string strReturn = strOriginal.data();
@@ -124,7 +122,7 @@ namespace KnightlyCommon {
 			 *
 			 *  @return std::string The unquoted string.
 			 */
-			static std::string UnQuoted(std::string /* NEXTME: string_view */ strInput, const bool bAllowBothQuoteTypes = false, const char charEscapeQuote = '\\')
+			static std::string UnQuoted(std::string_view strInput, const bool bAllowBothQuoteTypes = false, const char charEscapeQuote = '\\')
 			{
 				std::string strReturn = strInput.data();
 				const char charQuote = strInput[0];
@@ -171,15 +169,10 @@ namespace KnightlyCommon {
 			 * @return std::vector<std::string> A vector containing all of the split strings
 			 *
 			 **/
-			static std::vector<std::string> GetArgsFromString(std::string /* NEXTME: string_view */ strInput, const bool bKeepQuotes = false, const bool bKeepEscapeChar = false, const bool bAllowBothQuoteTypes = false, const char charDelimiter = ' ', const char charEscapeQuote = '\\') {
+			static std::vector<std::string> GetArgsFromString(std::string_view strInput, const bool bKeepQuotes = false, const bool bKeepEscapeChar = false, const bool bAllowBothQuoteTypes = false, const char charDelimiter = ' ', const char charEscapeQuote = '\\') {
 				// Trim the string
-				/* NEXTME:
 				strInput.remove_prefix(std::min(strInput.find_first_not_of(" "), strInput.size()));
 				strInput.remove_suffix(std::min(strInput.size() - strInput.find_last_not_of(" ") - 1, strInput.size()));
-				*/
-				strInput.erase(strInput.begin(), std::find_if(strInput.begin(), strInput.end(), [](int ch) { return !std::isspace(ch); }));
-				strInput.erase(std::find_if(strInput.rbegin(), strInput.rend(), [](int ch) { return !std::isspace(ch); }).base(), strInput.end());
-				// END NEXTME
 
 				std::vector<std::string> result;
 				bool inDoubleQuote = false;
@@ -303,7 +296,7 @@ namespace KnightlySQLite {
 				// If the path is relative, change the directory it's relative TO.
 				if (pathFile.is_relative()) {
 					// Tack on the base MQ2 directory
-					pathFile = gszINIPath / pathFile;
+					pathFile = gPathMQRoot / pathFile;
 				}
 				return pathFile;
 			}
@@ -377,7 +370,7 @@ namespace KnightlySQLite {
 			 * @return int The SQLite Result Code for opening the connection, UNKNOWN_ERROR, or CONN_EXISTS if the connection exists
 			 *
 			 **/
-			static int OpenDatabase(const std::string& strConnName, fs::path pathDatabase, const std::string& /* NEXTME: string_view */ strFlags = "") {
+			static int OpenDatabase(const std::string& strConnName, fs::path pathDatabase, const std::string_view strFlags = "") {
 				int iResult = UNKNOWN_ERROR;
 				int iOpenFlags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
 
@@ -526,7 +519,7 @@ namespace KnightlySQLite {
 			 * @return bool Whether the connection was successful or not
 			 *
 			 **/
-			static bool OpenDatabaseWithOutput(const std::string& strConnName, const fs::path& pathDatabase, const std::string& /* NEXTME: string_view */ strFlags = "") {
+			static bool OpenDatabaseWithOutput(const std::string& strConnName, const fs::path& pathDatabase, const std::string_view strFlags = "") {
 				bool bReturn = false;
 				const int rc = OpenDatabase(strConnName, pathDatabase, strFlags);
 
@@ -605,8 +598,7 @@ namespace KnightlySQLite {
 				if (multimapSQLResult.count(queryName) == 1) {
 					if (multimapSQLResult[queryName].count("Metadata") == 1) {
 						if (multimapSQLResult[queryName]["Metadata"].count("Rows") == 1) {
-							// NEXTME: const int intNumRows = GetIntFromString(multimapSQLResult[queryName]["Metadata"]["Rows"], 0);
-							const int intNumRows = std::stoi(KnightlySQLite::multimapSQLResult[queryName]["Metadata"]["Rows"]);
+							const int intNumRows = GetIntFromString(multimapSQLResult[queryName]["Metadata"]["Rows"], 0);
 							if (intNumRows > 0) {
 								for (int i = 1; i <= intNumRows; ++i) {
 									if (multimapSQLResult[queryName].count(std::to_string(i)) == 1) {
@@ -656,8 +648,7 @@ namespace KnightlySQLite {
 
 				if (KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"].count("Rows") == 1) {
 					// Convert the current rows to an int, add one, convert it back (rows are zero if there is a conversion error)
-					// NEXTME: KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"]["Rows"] = std::to_string((GetIntFromString(KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"]["Rows"], -1) + 1));
-					KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"]["Rows"] = std::to_string((std::stoi(KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"]["Rows"]) + 1));
+					KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"]["Rows"] = std::to_string((GetIntFromString(KnightlySQLite::multimapSQLResult[strQueryName]["Metadata"]["Rows"], -1) + 1));
 				}
 				else {
 					// We are the first row.
@@ -775,14 +766,8 @@ namespace KnightlySQLite {
 	};
 }
 
-// NEXTME:  Remove this function since it's better in core
-bool ci_equals(std::string& str1, std::string str2)
-{
-	return ((str1.size() == str2.size()) && std::equal(str1.begin(), str1.end(), str2.begin(), [](char & c1, char & c2){ return (c1 == c2 || std::tolower(c1) == std::tolower(c2)); }));
-}
-
 // Define the SQLite Command
-PLUGIN_API VOID SQLiteCommand(PSPAWNINFO pSpawn, PCHAR szLine)
+PLUGIN_API void SQLiteCommand(SPAWNINFO* pSpawn, char* szLine)
 {
 	std::vector<std::string> vArguments = KnightlyCommon::String::GetArgsFromString(szLine, true, true);
 	// If we don't have arguments or the first argument is "help" then show the help info
@@ -948,7 +933,7 @@ class MQ2SQLiteType : public MQ2Type {
 			AddMember(Clear, "clear");
 		}
 
-		bool GetMember(MQ2VARPTR VarPtr, char* Member, char* Index, MQ2TYPEVAR& Dest) {
+		bool GetMember(MQVarPtr VarPtr, char* Member, char* Index, MQTypeVar& Dest) {
 			_szBuffer[0] = '\0';
 			// Query / Row / Column
 			const std::vector<std::string> vArgs = KnightlyCommon::String::GetArgsFromString(Index);
@@ -956,12 +941,12 @@ class MQ2SQLiteType : public MQ2Type {
 			const int argRow = 1;
 			const int argColumn = 2;
 
-			PMQ2TYPEMEMBER pMember = MQ2SQLiteType::FindMember(Member);
+			MQTypeMember* pMember = MQ2SQLiteType::FindMember(Member);
 			if (!pMember) return false;
 
 			switch (pMember->ID) {
 				case Status:
-					Dest.Type = pStringType;
+					Dest.Type = mq::datatypes::pStringType;
 					// If we have a status set ...
 					if (KnightlySQLite::multimapSQLResult[Index]["Metadata"].count("Status") == 1)
 					{
@@ -974,17 +959,16 @@ class MQ2SQLiteType : public MQ2Type {
 					}
 					return true;
 				case Rows:
-					Dest.Type = pIntType;
+					Dest.Type = mq::datatypes::pIntType;
 					if (KnightlySQLite::multimapSQLResult[Index]["Metadata"].count("Rows") == 1)
 					{
-						// NEXTME: Dest.Int = GetIntFromString(KnightlySQLite::multimapSQLResult[Index]["Metadata"]["Rows"], 0);
-						Dest.Int = std::stoi(KnightlySQLite::multimapSQLResult[Index]["Metadata"]["Rows"]);
+						Dest.Int = GetIntFromString(KnightlySQLite::multimapSQLResult[Index]["Metadata"]["Rows"], 0);
 					} else {
 						Dest.Int = 0;
 					}
 					return true;
 				case Result:
-					Dest.Type = pStringType;
+					Dest.Type = mq::datatypes::pStringType;
 					// Make sure we have three parameters
 					if (vArgs.size() == 3) {
 						// Make sure we have that Query
@@ -1020,12 +1004,11 @@ class MQ2SQLiteType : public MQ2Type {
 					Dest.Ptr = &_szBuffer[0];
 					return true;
 				case ResultCode:
-					Dest.Type = pIntType;
+					Dest.Type = mq::datatypes::pIntType;
 					// If we have a ResultCode
 					if (KnightlySQLite::multimapSQLResult[Index]["Metadata"].count("ResultCode") == 1)
 					{
-						// NEXTME: Dest.Int = GetIntFromString(KnightlySQLite::multimapSQLResult[Index]["Metadata"]["ResultCode"], KnightlySQLite::SQL::custom_sqlite_result::CONVERSION_ERROR);
-						Dest.Int = std::stoi(KnightlySQLite::multimapSQLResult[Index]["Metadata"]["ResultCode"]);
+						Dest.Int = GetIntFromString(KnightlySQLite::multimapSQLResult[Index]["Metadata"]["ResultCode"], KnightlySQLite::SQL::custom_sqlite_result::CONVERSION_ERROR);
 					}
 					else {
 						Dest.Int = KnightlySQLite::SQL::custom_sqlite_result::QUERY_NOT_FOUND;
@@ -1037,7 +1020,7 @@ class MQ2SQLiteType : public MQ2Type {
 						KnightlyCommon::Log::Warning(".clear TLO is deprecated and will be removed in a future version.");
 						++KnightlySQLite::warningCountDotClear;
 					}
-					Dest.Type = pBoolType;
+					Dest.Type = mq::datatypes::pBoolType;
 					Dest.Int = KnightlySQLite::SQL::ClearQueryResults(Index);
 					return true;
 				default:
@@ -1046,19 +1029,19 @@ class MQ2SQLiteType : public MQ2Type {
 			return false;
 		}
 
-		bool FromData(MQ2VARPTR& VarPtr, MQ2TYPEVAR& Source) { return false; }
-		bool FromString(MQ2VARPTR& VarPtr, char* Source) { return false; }
+		bool FromData(MQVarPtr& VarPtr, MQTypeVar& Source) { return false; }
+		bool FromString(MQVarPtr& VarPtr, char* Source) { return false; }
 };
 
-BOOL SQLiteData(PCHAR szIndex, MQ2TYPEVAR& Dest)
+bool SQLiteData(const char* szIndex, MQTypeVar& Dest)
 {
 	Dest.DWord = 1;
 	Dest.Type = pSQLiteType;
-	return TRUE;
+	return true;
 }
 
 // Called once, when the plugin is to initialize
-PLUGIN_API VOID InitializePlugin()
+PLUGIN_API void InitializePlugin()
 {
 	DebugSpewAlways("Initializing MQ2SQLite");
 	KnightlyCommon::pluginName = "MQ2SQLite";
@@ -1070,19 +1053,13 @@ PLUGIN_API VOID InitializePlugin()
 }
 
 // Called once, when the plugin is to shutdown
-PLUGIN_API VOID ShutdownPlugin()
+PLUGIN_API void ShutdownPlugin()
 {
 	DebugSpewAlways("Shutting down MQ2SQLite");
 	// Close all of the database connections gracefully (and quietly)
-	/* NEXTME:
 	for (auto const &[key, val] : KnightlySQLite::mapDbConnections) {
 		if (KnightlySQLite::SQL::CloseDatabase(key) != 0) {
 			KnightlyCommon::Log::Error("Could not gracefully close database (" + key +") please remember to close your connections before unloading.");
-		}
-		 */
-	for (auto const& mapentry : KnightlySQLite::mapDbConnections) {
-		if (KnightlySQLite::SQL::CloseDatabase(mapentry.first) != 0) {
-			KnightlyCommon::Log::Error("Could not gracefully close database (" + mapentry.first +") please remember to close your connections before unloading.");
 		}
 	}
 	// Remove /sqlite
@@ -1090,4 +1067,16 @@ PLUGIN_API VOID ShutdownPlugin()
 	// Remove data type
 	RemoveMQ2Data("sqlite");
 	delete pSQLiteType;
+}
+
+PLUGIN_API void OnMacroStart(const char* Name)
+{
+	KnightlySQLite::warningCountDeprecatedVerb = 0;
+	KnightlySQLite::warningCountDotClear = 0;
+}
+
+PLUGIN_API void OnMacroStop(const char* Name)
+{
+	KnightlySQLite::warningCountDeprecatedVerb = 0;
+	KnightlySQLite::warningCountDotClear = 0;
 }
