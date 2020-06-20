@@ -966,7 +966,6 @@ class MQ2SQLiteType : public MQ2Type {
 					}
 				case Rows:
 					Dest.Type = pIntType;
-					Dest.Int = 0;
 					if (KnightlySQLite::multimapSQLResult[Index]["Metadata"].count("Rows") == 1)
 					{
 						// NEXTME: Dest.Int = GetIntFromString(KnightlySQLite::multimapSQLResult[Index]["Metadata"]["Rows"], 0);
