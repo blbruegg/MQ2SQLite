@@ -933,7 +933,7 @@ class MQ2SQLiteType : public MQ2Type {
 			AddMember(Clear, "clear");
 		}
 
-		bool GetMember(MQVarPtr VarPtr, char* Member, char* Index, MQTypeVar& Dest) {
+		virtual bool GetMember(MQVarPtr VarPtr, const char* Member, char* Index, MQTypeVar& Dest) override {
 			_szBuffer[0] = '\0';
 			// Query / Row / Column
 			const std::vector<std::string> vArgs = KnightlyCommon::String::GetArgsFromString(Index);
@@ -1030,7 +1030,7 @@ class MQ2SQLiteType : public MQ2Type {
 		}
 
 		bool FromData(MQVarPtr& VarPtr, MQTypeVar& Source) { return false; }
-		bool FromString(MQVarPtr& VarPtr, char* Source) { return false; }
+		virtual bool FromString(MQVarPtr& VarPtr, const char* Source) override { return false; }
 };
 
 bool SQLiteData(const char* szIndex, MQTypeVar& Dest)
