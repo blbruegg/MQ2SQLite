@@ -799,10 +799,10 @@ PLUGIN_API VOID SQLiteCommand(PSPAWNINFO pSpawn, PCHAR szLine)
 			}
 		}
 		else if (ci_equals(vArguments[0], "open")) {
-			// Arg2 is now unquoted as it turns into the path
-			vArguments[2] = KnightlyCommon::String::UnQuoted(vArguments[2]);
 			// Check to make sure we have at least 3 parameters
 			if (vArguments.size() > 2) {
+				// Arg2 is now unquoted as it turns into the path
+				vArguments[2] = KnightlyCommon::String::UnQuoted(vArguments[2]);
 				if (vArguments.size() > 3) {
 					KnightlySQLite::SQL::OpenDatabaseWithOutput(vArguments[1], vArguments[2], vArguments[3]);
 				}
