@@ -967,13 +967,12 @@ class MQ2SQLiteType : public MQ2Type {
 					{
 						strcpy_s(_szBuffer, KnightlySQLite::multimapSQLResult[Index]["Metadata"]["Status"].c_str());
 						Dest.Ptr = &_szBuffer[0];
-						return true;
 					} else {
 						// If we don't have a status, just return null...
 						strcpy_s(_szBuffer, "NULL");
 						Dest.Ptr = &_szBuffer[0];
-						return true;
 					}
+					return true;
 				case Rows:
 					Dest.Type = pIntType;
 					if (KnightlySQLite::multimapSQLResult[Index]["Metadata"].count("Rows") == 1)
