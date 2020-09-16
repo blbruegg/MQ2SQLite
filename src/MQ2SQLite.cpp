@@ -32,9 +32,9 @@ namespace KnightlyCommon {
 		private:
 			static std::string GetMacroInfo() {
 				std::string strReturn;
-				if (PMACROBLOCK pBlock = GetCurrentMacroBlock())
+				if (MQMacroBlockPtr pBlock = GetCurrentMacroBlock())
 				{
-					MACROLINE ml = pBlock->Line.at(gMacroBlock->CurrIndex);
+					MQMacroLine& ml = pBlock->Line.at(gMacroBlock->CurrIndex);
 					strReturn = " (" + ml.SourceFile + ":: Line " + std::to_string(ml.LineNumber) + ")";
 				}
 				return strReturn;
