@@ -23,13 +23,23 @@ namespace fs = std::experimental::filesystem;
 #undef min
 
 PreSetup("MQ2SQLite");
-PLUGIN_VERSION(2020.0618);
+PLUGIN_VERSION(2020.0915);
 
 namespace KnightlyCommon {
 	const bool SHOW_DEBUG_LOGS = false;
 	std::string pluginName = "Unnamed Plugin";
 
 	class Log {
+		private:
+			static std::string GetMacroInfo() {
+				std::string strReturn;
+				if (PMACROBLOCK pBlock = GetCurrentMacroBlock())
+				{
+					MACROLINE ml = pBlock->Line.at(gMacroBlock->CurrIndex);
+					strReturn = " (" + ml.SourceFile + ":: Line " + std::to_string(ml.LineNumber) + ")";
+				}
+				return strReturn;
+			}
 		public:
 			// Message is for logging a standard message.
 			// All other logging calls go through this base.
@@ -43,13 +53,13 @@ namespace KnightlyCommon {
 
 			// Warning is for logging warnings
 			static void Warning(std::string strWarning) {
-				strWarning = "\ayWARNING: " + strWarning;
+				strWarning = "\ayWARNING: " + strWarning + GetMacroInfo();
 				Message(strWarning);
 			}
 
 			// Error is for logging errors
 			static void Error(std::string strError) {
-				strError = "\arERROR: " + strError;
+				strError = "\arERROR: " + strError + GetMacroInfo();
 				Message(strError);
 			}
 

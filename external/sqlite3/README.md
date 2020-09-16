@@ -1,8 +1,8 @@
 # SQLite 3 lib
 
-Current Version is: 3.32.3
+Current Version is: 3.33.0
 
-Last Reviewed:  2020-06-18
+Last Reviewed:  2020-09-15
 
 ## Updating
 
