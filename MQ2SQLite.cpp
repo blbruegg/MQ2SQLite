@@ -22,7 +22,7 @@ namespace fs = std::filesystem;
 #undef min
 
 PreSetup("MQ2SQLite");
-PLUGIN_VERSION(2020.0915);
+PLUGIN_VERSION(2021.0102);
 
 namespace KnightlyCommon {
 	const bool SHOW_DEBUG_LOGS = false;
@@ -240,11 +240,6 @@ namespace KnightlySQLite {
 	// Store all of our database connections by name
 	std::map<std::string, sqlite3*> mapDbConnections;
 
-	// Limit warnings -- deprecate this when their counterparts are
-	int warningCountDotClear = 0;
-	int warningCountDeprecatedVerb = 0;
-	const int MAX_WARNINGS = 5;
-
 	// Log Functions we'll be using
 	class Log {
 		public:
@@ -321,8 +316,9 @@ namespace KnightlySQLite {
 				bool bReturn = false;
 				// Make this an absolute path
 				pathFile = MakeAbsolutePath(pathFile);
+				std::error_code ec_exists;
 				// Check if the file already exists (if it does, we think it's valid)
-				if (!fs::exists(pathFile)) {
+				if (!fs::exists(pathFile, ec_exists)) {
 					// If the file doesn't already exist then it doesn't necessarily mean it can't be created
 					std::ofstream writePath(pathFile);
 					if (writePath) {
@@ -563,6 +559,7 @@ namespace KnightlySQLite {
 				switch (rc) {
 					case MAP_NOT_ERASED:
 						KnightlyCommon::Log::Error("Couldn't clear \"" + strConnName + "\" from memory.");
+						break;
 					case CONN_NOT_FOUND:
 						KnightlyCommon::Log::Warning("Database Connection named \"" + strConnName + "\" doesn't exist to close.");
 						break;
@@ -777,7 +774,7 @@ PLUGIN_API void SQLiteCommand(SPAWNINFO* pSpawn, char* szLine)
 	else {
 		// Arg 0 is only unquoted in the deprecated version, but it doesn't hurt to unquote it here
 		vArguments[0] = KnightlyCommon::String::UnQuoted(vArguments[0]);
-		// Arg 1 is always unquoted as it's either the path, Conn Name, or Query Name (deprecated)
+		// Arg 1 is always unquoted as it's either the path or Conn Name
 		if (vArguments.size() > 1) {
 			vArguments[1] = KnightlyCommon::String::UnQuoted(vArguments[1]);
 		}
@@ -858,45 +855,7 @@ PLUGIN_API void SQLiteCommand(SPAWNINFO* pSpawn, char* szLine)
 			}
 		}
 		else {
-			// TODO:  Deprecate this section in favor of leaving just the "Invalid Verb" wording.
-			if (KnightlySQLite::warningCountDeprecatedVerb <= KnightlySQLite::MAX_WARNINGS) {
-				KnightlyCommon::Log::Warning("Deprecated method or invalid verb.");
-				++KnightlySQLite::warningCountDeprecatedVerb;
-			}
-			// Check to make sure we have at least 3 parameters (if not we don't have enough to process a query)
-			if (vArguments.size() > 2) {
-				if (KnightlySQLite::warningCountDeprecatedVerb <= KnightlySQLite::MAX_WARNINGS) {
-					KnightlyCommon::Log::Warning("Attempting Query - Query verb will be required in a future version.");
-					++KnightlySQLite::warningCountDeprecatedVerb;
-				}
-				// Build the SQL query again
-				std::string strSQLCommand = vArguments[2];
-				for (size_t i = 3; i < vArguments.size(); i++) {
-					strSQLCommand += " " + vArguments[i];
-				}
-
-				// Generate a unique database name
-				std::string strGenericDBName = "KnightlyGenericDBCall";
-				int i = 1;
-				// iterate only 1000 times, if we couldn't get it by then, something went wrong and the OpenDatabase will throw.
-				while (KnightlySQLite::mapDbConnections.count(strGenericDBName) != 0 && i < 1000) {
-					strGenericDBName = "KnightlyGenericDBCall" + std::to_string(i);
-					i++;
-				}
-
-				if (KnightlySQLite::File::IsValidFilePath(vArguments[0])) {
-					if (KnightlySQLite::SQL::OpenDatabaseWithOutput(strGenericDBName, KnightlySQLite::File::MakeAbsolutePath(vArguments[0]))) {
-						KnightlySQLite::SQL::QueryDatabaseWithOutput(strGenericDBName, vArguments[1], strSQLCommand);
-						KnightlySQLite::SQL::CloseDatabaseWithOutput(strGenericDBName);
-					}
-				}
-				else {
-					KnightlyCommon::Log::Error("Invalid File Path for Query: " + vArguments[0]);
-				}
-			} else {
-				KnightlyCommon::Log::Error("Missing parameters for query.");
-				KnightlySQLite::Log::ShowHelp();
-			}
+			KnightlyCommon::Log::Warning("Invalid verb: " + vArguments[0]);
 		}
 	}
 }
@@ -928,9 +887,6 @@ class MQ2SQLiteType : public MQ2Type {
 			AddMember(ResultCode, "Resultcode");
 			AddMember(ResultCode, "resultCode");
 			AddMember(ResultCode, "resultcode");
-
-			TypeMember(Clear);
-			AddMember(Clear, "clear");
 		}
 
 		virtual bool GetMember(MQVarPtr VarPtr, const char* Member, char* Index, MQTypeVar& Dest) override {
@@ -942,7 +898,9 @@ class MQ2SQLiteType : public MQ2Type {
 			const int argColumn = 2;
 
 			MQTypeMember* pMember = MQ2SQLiteType::FindMember(Member);
-			if (!pMember) return false;
+			if (!pMember) {
+				return false;
+			}
 
 			switch (pMember->ID) {
 				case Status:
@@ -1014,22 +972,13 @@ class MQ2SQLiteType : public MQ2Type {
 						Dest.Int = KnightlySQLite::SQL::custom_sqlite_result::QUERY_NOT_FOUND;
 					}
 					return true;
-				// TODO: Deprecate this section.
-				case Clear:
-					if (KnightlySQLite::warningCountDotClear <= KnightlySQLite::MAX_WARNINGS) {
-						KnightlyCommon::Log::Warning(".clear TLO is deprecated and will be removed in a future version.");
-						++KnightlySQLite::warningCountDotClear;
-					}
-					Dest.Type = mq::datatypes::pBoolType;
-					Dest.Int = KnightlySQLite::SQL::ClearQueryResults(Index);
-					return true;
 				default:
 					break;
 			}
 			return false;
 		}
 
-		bool FromData(MQVarPtr& VarPtr, MQTypeVar& Source) { return false; }
+		virtual bool FromData(MQVarPtr& VarPtr, MQTypeVar& Source) { return false; }
 		virtual bool FromString(MQVarPtr& VarPtr, const char* Source) override { return false; }
 };
 
@@ -1067,16 +1016,4 @@ PLUGIN_API void ShutdownPlugin()
 	// Remove data type
 	RemoveMQ2Data("sqlite");
 	delete pSQLiteType;
-}
-
-PLUGIN_API void OnMacroStart(const char* Name)
-{
-	KnightlySQLite::warningCountDeprecatedVerb = 0;
-	KnightlySQLite::warningCountDotClear = 0;
-}
-
-PLUGIN_API void OnMacroStop(const char* Name)
-{
-	KnightlySQLite::warningCountDeprecatedVerb = 0;
-	KnightlySQLite::warningCountDotClear = 0;
 }
