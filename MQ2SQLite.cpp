@@ -977,9 +977,6 @@ class MQ2SQLiteType : public MQ2Type {
 			}
 			return false;
 		}
-
-		virtual bool FromData(MQVarPtr& VarPtr, MQTypeVar& Source) { return false; }
-		virtual bool FromString(MQVarPtr& VarPtr, const char* Source) override { return false; }
 };
 
 bool SQLiteData(const char* szIndex, MQTypeVar& Dest)
