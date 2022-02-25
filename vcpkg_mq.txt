@@ -1,1 +1,2 @@
-sqlite3
+# This matches to the lsqlite3 lua rock
+sqlite3[math,geopoly,json1]
