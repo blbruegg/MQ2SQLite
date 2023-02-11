@@ -259,7 +259,7 @@ namespace KnightlySQLite {
 				KnightlyCommon::Log::Message("\ayExample:");
 				KnightlyCommon::Log::Message("\ay     /sqlite query \"C:\\Test.db\" myquery SELECT * FROM Table;");
 				KnightlyCommon::Log::Message(" ");
-				KnightlyCommon::Log::Message("\ayAvailable TLOs:");
+				KnightlyCommon::Log::Message("\ayTLO and Members:");
 				KnightlyCommon::Log::Message("\ay     ${sqlite.status[QueryName]} -- String - Current status - Either Active, Success, or Failed");
 				KnightlyCommon::Log::Message("\ay     ${sqlite.connstatus[ConnName]} -- String - Current Connection status - Either Open, or Closed");
 				KnightlyCommon::Log::Message("\ay     ${sqlite.rows[QueryName]} -- Int - The number of rows returned for results");
@@ -860,7 +860,6 @@ PLUGIN_API void SQLiteCommand(SPAWNINFO* pSpawn, char* szLine)
 	}
 }
 
-class MQ2SQLiteType *pSQLiteType = nullptr;
 class MQ2SQLiteType : public MQ2Type {
 	private:
 		char _szBuffer[MAX_STRING] = { 0 };
@@ -978,6 +977,7 @@ class MQ2SQLiteType : public MQ2Type {
 			return false;
 		}
 };
+MQ2SQLiteType *pSQLiteType = nullptr;
 
 bool SQLiteData(const char* szIndex, MQTypeVar& Dest)
 {
